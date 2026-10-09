@@ -233,6 +233,10 @@ struct App {
     apply: HtmlButtonElement,
     cancle: HtmlButtonElement,
     kernel_ta: HtmlTextAreaElement,
+    fps_el: HtmlElement,
+    fps_frames: u32,
+    fps_last: f64,
+    fps_value: f64,
 }
 
 impl App {
@@ -337,10 +341,16 @@ impl App {
 
     fn fit_canvas(&mut self) {
         let window = web_sys::window().expect("no window");
-        let doc = window.document().expect("no document");
-        let body = doc.body().expect("no body");
-        let mut cx = body.client_width() as f64;
-        let mut cy = body.client_height() as f64;
+        let mut cx = window
+            .inner_width()
+            .ok()
+            .and_then(|v| v.as_f64())
+            .unwrap_or(0.0);
+        let mut cy = window
+            .inner_height()
+            .ok()
+            .and_then(|v| v.as_f64())
+            .unwrap_or(0.0);
         if cx > cy {
             cx = cy;
         } else {
@@ -354,6 +364,18 @@ impl App {
             .main_el
             .style()
             .set_property("transform", &format!("scale({},{})", cx / 1024.0, cy / 1024.0));
+    }
+
+    fn update_fps(&mut self, now: f64) {
+        self.fps_frames += 1;
+        let elapsed = now - self.fps_last;
+        if elapsed >= 0.5 {
+            self.fps_value = (self.fps_frames as f64) * 1000.0 / elapsed;
+            self.fps_frames = 0;
+            self.fps_last = now;
+            let text = format!("FPS: {:.0}", self.fps_value);
+            self.fps_el.set_inner_text(&text);
+        }
     }
 }
 
@@ -465,6 +487,13 @@ pub fn main() -> Result<(), JsValue> {
             .get_element_by_id("kernel")
             .expect("missing #kernel")
             .dyn_into::<HtmlTextAreaElement>()?,
+        fps_el: document
+            .get_element_by_id("fps")
+            .expect("missing #fps")
+            .dyn_into::<HtmlElement>()?,
+        fps_frames: 0,
+        fps_last: 0.0,
+        fps_value: 0.0,
     }));
 
     {
@@ -719,6 +748,7 @@ pub fn main() -> Result<(), JsValue> {
             let mut a = app_c.borrow_mut();
             a.ang1 += 0.01;
             a.draw();
+            a.update_fps(js_sys::Date::now());
             let _ = window_c.request_animation_frame(f.borrow().as_ref().unwrap().as_ref().unchecked_ref());
         }) as Box<dyn FnMut()>));
         window.request_animation_frame(g.borrow().as_ref().unwrap().as_ref().unchecked_ref())?;

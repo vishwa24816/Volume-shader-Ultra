@@ -33,6 +33,17 @@
             top: 30px;
             display: none;
         }
+        #fps {
+            position: fixed;
+            right: 0px;
+            top: 0px;
+            color: #0f0;
+            background: rgba(0,0,0,0.5);
+            font-family: monospace;
+            font-size: 14px;
+            padding: 2px 6px;
+            z-index: 10;
+        }
     </style>
 </head>
 <body style="overflow-x:hidden;overflow-y:hidden">
@@ -48,9 +59,13 @@
         <button id="apply">APPLY</button>
         <button id="cancle">CANCLE</button>
     </div>
+    <div id="fps">FPS: --</div>
     <script type="module">
         import init from './pkg/vsbm.js';
-        init();
+        init().catch(function(e) {
+            console.error('vsbm init failed:', e);
+            alert('vsbm init failed: ' + (e && e.message ? e.message : e));
+        });
     </script>
 </body>
 </html>

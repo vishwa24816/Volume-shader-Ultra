@@ -46,23 +46,11 @@ function __wbg_get_imports() {
         __wbg_bindBuffer_2195e89b585ce0c3: function(arg0, arg1, arg2) {
             arg0.bindBuffer(arg1 >>> 0, arg2);
         },
-        __wbg_body_e549239eaff082e1: function(arg0) {
-            const ret = arg0.body;
-            return isLikeNone(ret) ? 0 : addToExternrefTable0(ret);
-        },
         __wbg_bufferData_53e0f7a06b58fe81: function(arg0, arg1, arg2, arg3) {
             arg0.bufferData(arg1 >>> 0, arg2, arg3 >>> 0);
         },
         __wbg_button_1aa380c7ca420cd1: function(arg0) {
             const ret = arg0.button;
-            return ret;
-        },
-        __wbg_clientHeight_33dd2a2c8630a1f1: function(arg0) {
-            const ret = arg0.clientHeight;
-            return ret;
-        },
-        __wbg_clientWidth_08d5512595aacb73: function(arg0) {
-            const ret = arg0.clientWidth;
             return ret;
         },
         __wbg_clientX_5075231ed45e8ef5: function(arg0) {
@@ -151,6 +139,10 @@ function __wbg_get_imports() {
             const ret = arg0[arg1 >>> 0];
             return isLikeNone(ret) ? 0 : addToExternrefTable0(ret);
         },
+        __wbg_innerHeight_7f20e0f1a7c5a573: function() { return handleError(function (arg0) {
+            const ret = arg0.innerHeight;
+            return ret;
+        }, arguments); },
         __wbg_innerText_210ec130237a8f65: function(arg0, arg1) {
             const ret = arg1.innerText;
             const ptr1 = passStringToWasm0(ret, wasm.__wbindgen_malloc, wasm.__wbindgen_realloc);
@@ -158,6 +150,10 @@ function __wbg_get_imports() {
             getDataViewMemory0().setInt32(arg0 + 4 * 1, len1, true);
             getDataViewMemory0().setInt32(arg0 + 4 * 0, ptr1, true);
         },
+        __wbg_innerWidth_1bc526614080537c: function() { return handleError(function (arg0) {
+            const ret = arg0.innerWidth;
+            return ret;
+        }, arguments); },
         __wbg_instanceof_HtmlButtonElement_bd67486d3501ad48: function(arg0) {
             let result;
             try {
@@ -227,6 +223,10 @@ function __wbg_get_imports() {
         },
         __wbg_new_from_slice_ca6ad97db1f4779a: function(arg0, arg1) {
             const ret = new Float32Array(getArrayF32FromWasm0(arg0, arg1));
+            return ret;
+        },
+        __wbg_now_aa4ccb83129e9e55: function() {
+            const ret = Date.now();
             return ret;
         },
         __wbg_preventDefault_af59afb0f0a02e20: function(arg0) {
