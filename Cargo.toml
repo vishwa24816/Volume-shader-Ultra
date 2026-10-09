@@ -1,0 +1,47 @@
+[package]
+name = "vsbm"
+version = "0.1.0"
+edition = "2021"
+description = "volumeshader_bm rewritten in Rust + WASM (replicates https://cznull.github.io/vsbm)"
+license = "MIT"
+
+[lib]
+crate-type = ["cdylib"]
+
+[dependencies]
+wasm-bindgen = "0.2"
+wasm-bindgen-futures = "0.4"
+web-sys = { version = "0.3", features = [
+    "Window",
+    "Document",
+    "Element",
+    "HtmlElement",
+    "CssStyleDeclaration",
+    "HtmlCanvasElement",
+    "HtmlTextAreaElement",
+    "HtmlButtonElement",
+    "WebGlRenderingContext",
+    "WebGlProgram",
+    "WebGlShader",
+    "WebGlBuffer",
+    "WebGlUniformLocation",
+    "Event",
+    "MouseEvent",
+    "WheelEvent",
+    "TouchEvent",
+    "Touch",
+    "TouchList",
+    "DomRect",
+    "KeyboardEvent",
+    "console",
+] }
+js-sys = "0.3"
+
+[profile.release]
+opt-level = 3
+
+[package.metadata.wasm-pack.profile.release]
+wasm-opt = false
+
+[package.metadata.wasm-pack.profile.dev]
+wasm-opt = false

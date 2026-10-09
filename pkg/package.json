@@ -1,0 +1,17 @@
+{
+  "name": "vsbm",
+  "type": "module",
+  "description": "volumeshader_bm rewritten in Rust + WASM (replicates https://cznull.github.io/vsbm)",
+  "version": "0.1.0",
+  "license": "MIT",
+  "files": [
+    "vsbm_bg.wasm",
+    "vsbm.js",
+    "vsbm.d.ts"
+  ],
+  "main": "vsbm.js",
+  "types": "vsbm.d.ts",
+  "sideEffects": [
+    "./snippets/*"
+  ]
+}
