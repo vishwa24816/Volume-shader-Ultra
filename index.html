@@ -50,7 +50,10 @@
     </div>
     <script type="module">
         import init from './pkg/vsbm.js';
-        init();
+        init().catch(function(e) {
+            console.error('vsbm init failed:', e);
+            alert('vsbm init failed: ' + (e && e.message ? e.message : e));
+        });
     </script>
 </body>
 </html>

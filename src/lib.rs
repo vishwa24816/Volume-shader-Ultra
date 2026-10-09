@@ -337,10 +337,8 @@ impl App {
 
     fn fit_canvas(&mut self) {
         let window = web_sys::window().expect("no window");
-        let doc = window.document().expect("no document");
-        let body = doc.body().expect("no body");
-        let mut cx = body.client_width() as f64;
-        let mut cy = body.client_height() as f64;
+        let mut cx = window.inner_width().map(|v| v.as_f64().unwrap_or(0.0)).unwrap_or(0.0);
+        let mut cy = window.inner_height().map(|v| v.as_f64().unwrap_or(0.0)).unwrap_or(0.0);
         if cx > cy {
             cx = cy;
         } else {
@@ -359,6 +357,39 @@ impl App {
 
 #[wasm_bindgen(start)]
 pub fn main() -> Result<(), JsValue> {
+    let window = web_sys::window().expect("no global window");
+    let document = window.document().expect("no document");
+
+    // The original runs its init on window.onload, after layout is done.
+    // ES modules evaluate after DOMContentLoaded but possibly before the
+    // load event / final layout, so defer init until the document has
+    // finished loading and layout is complete.
+    let ready_state = document.ready_state();
+    if ready_state == "loading" {
+        let closure = Closure::wrap(Box::new(move |_ev: Event| {
+            if let Err(e) = init_app() {
+                web_sys::console::error_1(&JsValue::from_str(&format!("vsbm init error: {:?}", e)));
+            }
+        }) as Box<dyn FnMut(Event)>);
+        window.set_onload(Some(closure.as_ref().unchecked_ref()));
+        closure.forget();
+    } else {
+        // Document already loaded: defer one animation frame so that
+        // layout (and thus body.clientWidth/clientHeight) is final.
+        let closure = Closure::wrap(Box::new(move || {
+            if let Err(e) = init_app() {
+                web_sys::console::error_1(&JsValue::from_str(&format!("vsbm init error: {:?}", e)));
+            }
+        }) as Box<dyn FnMut()>);
+        window
+            .request_animation_frame(closure.as_ref().unchecked_ref())?;
+        closure.forget();
+    }
+
+    Ok(())
+}
+
+fn init_app() -> Result<(), JsValue> {
     let window = web_sys::window().expect("no global window");
     let document = window.document().expect("no document");
 
@@ -714,14 +745,17 @@ pub fn main() -> Result<(), JsValue> {
         let app_c = app.clone();
         let window_c = window.clone();
         let f: Rc<RefCell<Option<Closure<dyn FnMut()>>>> = Rc::new(RefCell::new(None));
-        let g = f.clone();
-        *g.borrow_mut() = Some(Closure::wrap(Box::new(move || {
+        let f_inner = f.clone();
+        *f.borrow_mut() = Some(Closure::wrap(Box::new(move || {
             let mut a = app_c.borrow_mut();
             a.ang1 += 0.01;
             a.draw();
-            let _ = window_c.request_animation_frame(f.borrow().as_ref().unwrap().as_ref().unchecked_ref());
+            let _ = window_c.request_animation_frame(f_inner.borrow().as_ref().unwrap().as_ref().unchecked_ref());
         }) as Box<dyn FnMut()>));
-        window.request_animation_frame(g.borrow().as_ref().unwrap().as_ref().unchecked_ref())?;
+        window.request_animation_frame(f.borrow().as_ref().unwrap().as_ref().unchecked_ref())?;
+        // Leak the Rc so the Closure inside it stays alive for the page lifetime.
+        // The closure re-registers itself each frame, so it must never be dropped.
+        let _leaked = Rc::into_raw(f);
     }
 
     // keep spawn_local import used (future-proofing for async init if needed)
